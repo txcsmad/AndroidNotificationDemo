@@ -1,10 +1,13 @@
 package nlaz.notificationdemo;
 
+import org.parceler.Parcel;
+
 import java.util.Calendar;
 
 /**
  * Created by nlazaris on 3/25/15.
  */
+@Parcel
 public class Task {
 
 
@@ -12,6 +15,8 @@ public class Task {
     private String description;
     private Calendar time;
     private boolean isActive = false;
+
+    public Task(){}
 
     public Task(String title, String description, Calendar time){
         this.title = title;

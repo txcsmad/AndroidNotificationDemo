@@ -1,6 +1,9 @@
 package nlaz.notificationdemo;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -11,6 +14,8 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -109,7 +114,12 @@ public class MainActivity extends ActionBarActivity {
                     task.setActive(buttonView.isChecked());
 
                     if (buttonView.isChecked()){
-                        //TODO: Set Alarm Service
+                        Intent myIntent = new Intent(MainActivity.this, MyReceiver.class);
+                        myIntent.putExtra("TASK", Parcels.wrap(task));
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent,0);
+
+                        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+                        alarmManager.set(AlarmManager.RTC, task.getTime().getTimeInMillis(), pendingIntent);
 
                     } else {
                         //TODO: Cancel Alarm Service

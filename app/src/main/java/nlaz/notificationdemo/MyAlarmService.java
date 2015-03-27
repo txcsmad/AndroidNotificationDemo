@@ -7,12 +7,15 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import org.parceler.Parcels;
+
 /**
  * Created by nlazaris on 3/25/15.
  */
 public class MyAlarmService extends Service
 {
 
+    private Task task;
     private NotificationManager mManager;
 
     @Override
@@ -22,26 +25,40 @@ public class MyAlarmService extends Service
     }
 
     @Override
-    public void onCreate()
-    {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        task = Parcels.unwrap(intent.getParcelableExtra("TASK"));
         mManager = (NotificationManager) this.getApplicationContext().getSystemService(this.getApplicationContext().NOTIFICATION_SERVICE);
-
-        showNotification();
-
+        createNotification();
+        return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
 
-    private void showNotification(){
-        Intent intent1 = new Intent(this.getApplicationContext(),MainActivity.class);
+    public void createNotification() {
+        // Prepare intent which is triggered if the
+        // notification is selected
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra("TASK",Parcels.wrap(task));
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Notification notification = new Notification(R.mipmap.ic_launcher,"This is a test message!", System.currentTimeMillis());
-        intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP| Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        PendingIntent pendingNotificationIntent = PendingIntent.getActivity( this.getApplicationContext(),0, intent1,PendingIntent.FLAG_UPDATE_CURRENT);
+        // Build notification
+        // Actions are just fake
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle(task.getTitle())
+                .setContentText(task.getDescription())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pIntent)
+                .build();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        // hide the notification after its selected
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(this.getApplicationContext(), "AlarmManagerDemo", "This is a test message!", pendingNotificationIntent);
 
-        mManager.notify(0, notification);
+        notificationManager.notify(0, notification);
+
     }
 
     @Override
